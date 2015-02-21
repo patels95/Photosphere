@@ -2,7 +2,9 @@ package com.patels95.sanam.stormy;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
@@ -43,6 +45,11 @@ public class MainActivity extends ActionBarActivity {
     @InjectView(R.id.refreshImageView) ImageView mRefreshImageView;
     @InjectView(R.id.progressBar) ProgressBar mProgressBar;
 
+
+    //declare latitude and longitude
+    double latitude;
+    double longitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +58,42 @@ public class MainActivity extends ActionBarActivity {
 
         mProgressBar.setVisibility(View.INVISIBLE);
 
-        //set the default location
-        final double latitude = 37.8267;
-        final double longitude = -122.423;
+
+        //get location from the user
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        final Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30, 1, locationListener);
+
+        Log.d(TAG, "loc = " + latitude + " and " + longitude);
+
+        //default forecast location - Alcatraz
+//        final double latitude = 37.8267;
+//        final double longitude = -122.423;
+
 
         //refresh forecast when the refresh button is pressed
         mRefreshImageView.setOnClickListener(new View.OnClickListener(){
