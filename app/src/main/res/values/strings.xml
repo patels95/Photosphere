@@ -8,5 +8,6 @@
     <string name="error_msg">There was an error. Please try again.</string>
     <string name="error_ok_text">ok</string>
     <string name="network_error_msg">Network is unavailable!</string>
+    <string name="default_location">Alcatraz Island, CA</string>
 
 </resources>

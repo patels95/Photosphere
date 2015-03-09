@@ -1,7 +1,9 @@
-package com.patels95.sanam.stormy;
+package com.patels95.sanam.stormy.ui;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.patels95.sanam.stormy.R;
+import com.patels95.sanam.stormy.weather.Current;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -26,6 +30,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -34,7 +40,7 @@ import butterknife.InjectView;
 public class MainActivity extends ActionBarActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
-    private CurrentWeather mCurrentWeather;
+    private Current mCurrent;
 
     @InjectView(R.id.temperatureLabel) TextView mTemperatureLabel;
     @InjectView(R.id.timeLabel) TextView mTimeLabel;
@@ -44,6 +50,7 @@ public class MainActivity extends ActionBarActivity {
     @InjectView(R.id.iconImageView) ImageView mIconImageView;
     @InjectView(R.id.refreshImageView) ImageView mRefreshImageView;
     @InjectView(R.id.progressBar) ProgressBar mProgressBar;
+    @InjectView(R.id.locationLabel) TextView mLocationLabel;
 
 
     //declare latitude and longitude
@@ -87,7 +94,7 @@ public class MainActivity extends ActionBarActivity {
         };
 
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30, 1, locationListener);
-
+        //log the latitude and longitude
         Log.d(TAG, "loc = " + latitude + " and " + longitude);
 
         //default forecast location - Alcatraz
@@ -100,12 +107,36 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v){
                 getForecast(latitude, longitude);
+                //updateCity(getCityName(latitude, longitude));
             }
         });
         getForecast(latitude, longitude);
-
+        //updateCity(getCityName(latitude, longitude));
 
         Log.d(TAG, "ui code is running");
+    }
+
+    private void updateCity(String[] cityState) {
+        mLocationLabel.setText(cityState[0] + ", " + cityState[1]);
+    }
+
+    private String[] getCityName(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        List<Address> addresses;
+        String[] cityState = new String[2];
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            //ERROR with geo data
+//            String cityName = addresses.get(0).getAddressLine(0);
+//            String stateName = addresses.get(0).getAddressLine(1);
+//            cityState[0] = cityName;
+//            cityState[1] = stateName;
+//            Log.d(TAG, "city = " + cityState[0] + " and state =  " + cityState[1]);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return cityState;
     }
 
     private void getForecast(double latitude, double longitude) {
@@ -149,7 +180,7 @@ public class MainActivity extends ActionBarActivity {
                         String jsonData = response.body().string();
                         Log.v(TAG, jsonData);
                         if (response.isSuccessful()) {
-                            mCurrentWeather = getCurrentDetails(jsonData);
+                            mCurrent = getCurrentDetails(jsonData);
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -160,10 +191,7 @@ public class MainActivity extends ActionBarActivity {
                             alertUserAboutError();
                         }
                     }
-                    catch (IOException e) {
-                        Log.e(TAG, "Exception caught: ", e);
-                    }
-                    catch (JSONException e){
+                    catch (IOException | JSONException e) {
                         Log.e(TAG, "Exception caught: ", e);
                     }
                 }
@@ -187,23 +215,23 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void updateDisplay() {
-        mTemperatureLabel.setText(mCurrentWeather.getTemperature() + "");
-        mTimeLabel.setText("At " + mCurrentWeather.getFormattedTime() + " it will be");
-        mHumidityValue.setText(mCurrentWeather.getHumidity() + "");
-        mPrecipValue.setText(mCurrentWeather.getPrecipChance() + "%");
-        mSummaryLabel.setText(mCurrentWeather.getSummary());
-        Drawable drawable = getResources().getDrawable(mCurrentWeather.getIconId());
+        mTemperatureLabel.setText(mCurrent.getTemperature() + "");
+        mTimeLabel.setText("At " + mCurrent.getFormattedTime() + " it will be");
+        mHumidityValue.setText(mCurrent.getHumidity() + "%");
+        mPrecipValue.setText(mCurrent.getPrecipChance() + "%");
+        mSummaryLabel.setText(mCurrent.getSummary());
+        Drawable drawable = getResources().getDrawable(mCurrent.getIconId());
         mIconImageView.setImageDrawable(drawable);
     }
 
-    private CurrentWeather getCurrentDetails(String jsonData) throws JSONException{
+    private Current getCurrentDetails(String jsonData) throws JSONException{
         JSONObject forecast = new JSONObject(jsonData);
         String timezone = forecast.getString("timezone");
         Log.i(TAG, "From JSON: " + timezone);
 
         JSONObject current = forecast.getJSONObject("currently");
 
-        CurrentWeather currentWeather = new CurrentWeather();
+        Current currentWeather = new Current();
         currentWeather.setHumidity(current.getDouble("humidity"));
         currentWeather.setTime(current.getLong("time"));
         currentWeather.setIcon(current.getString("icon"));
@@ -213,7 +241,6 @@ public class MainActivity extends ActionBarActivity {
         currentWeather.setTimeZone(timezone);
 
         Log.d(TAG,  currentWeather.getFormattedTime());
-
         return currentWeather;
     }
 

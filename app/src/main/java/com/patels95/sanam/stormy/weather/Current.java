@@ -1,4 +1,6 @@
-package com.patels95.sanam.stormy;
+package com.patels95.sanam.stormy.weather;
+
+import com.patels95.sanam.stormy.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,7 +9,7 @@ import java.util.TimeZone;
 /**
  * Created by Sanam on 1/19/15.
  */
-public class CurrentWeather {
+public class Current {
 
     private String mIcon;
     private long mTime;
@@ -95,7 +97,7 @@ public class CurrentWeather {
     }
 
     public double getHumidity() {
-        return mHumidity;
+        return mHumidity * 100;
     }
 
     public void setHumidity(double humidity) {
