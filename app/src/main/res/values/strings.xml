@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Stormy</string>
+    <string name="app_name">Photosphere</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="error_title">Sorry!</string>
@@ -9,5 +9,13 @@
     <string name="error_ok_text">ok</string>
     <string name="network_error_msg">Network is unavailable!</string>
     <string name="default_location">Alcatraz Island, CA</string>
+    <string name="hourly">HOURLY</string>
+    <string name="seven_day">7 DAY</string>
+    <string name="loading">Getting Current Weather...</string>
+    <string name="dash">--</string>
+    <string name="precip">PRECIP%</string>
+    <string name="title_activity_daily_forecast">DailyForecastActivity</string>
+    <string name="no_daily_forecast_data">There is no data to display</string>
+    <string name="title_activity_hourly_forecast">HourlyForecastActivity</string>
 
 </resources>
