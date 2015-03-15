@@ -1,13 +1,14 @@
 package com.patels95.sanam.stormy.ui;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Parcelable;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.ArrayAdapter;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.patels95.sanam.stormy.R;
 import com.patels95.sanam.stormy.adapters.DayAdapter;
@@ -15,14 +16,23 @@ import com.patels95.sanam.stormy.weather.Day;
 
 import java.util.Arrays;
 
-public class DailyForecastActivity extends ListActivity {
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
+public class DailyForecastActivity extends Activity {
 
     private Day[] mDays;
+
+    @InjectView(android.R.id.list)
+    ListView mListView;
+    @InjectView(android.R.id.empty)
+    TextView mEmptyTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_forecast);
+        ButterKnife.inject(this);
 
         // get data from intent can put it in parcelable array. Then copy to array mDays.
         Intent intent = getIntent();
@@ -30,7 +40,18 @@ public class DailyForecastActivity extends ListActivity {
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
 
         DayAdapter adapter = new DayAdapter(this, mDays);
-        setListAdapter(adapter);
+        mListView.setAdapter(adapter);
+        mListView.setEmptyView(mEmptyTextView);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String dayOfTheWeek = mDays[position].getDayOfTheWeek();
+                String conditions = mDays[position].getSummary();
+                String highTemp = mDays[position].getTemperatureMax() + "";
+                String message = String.format("On " + dayOfTheWeek + " the high will be " + highTemp
+                        + " and it will be " + conditions);
+                Toast.makeText(DailyForecastActivity.this, message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
-
 }
