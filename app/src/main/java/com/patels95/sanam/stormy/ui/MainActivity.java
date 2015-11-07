@@ -106,10 +106,11 @@ public class MainActivity extends ActionBarActivity {
         lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30, 1, locationListener);
         //log the latitude and longitude
         Log.d(TAG, "loc = " + latitude + " and " + longitude);
+//        Toast.makeText(this, "loc = " + latitude + " and " + longitude, Toast.LENGTH_LONG).show();
 
-        //default forecast location - Alcatraz
-//        final double latitude = 37.8267;
-//        final double longitude = -122.423;
+//        default forecast location - Boston
+        final double latitude = 42.360082;
+        final double longitude = -71.058880;
 
 
         //refresh forecast when the refresh button is pressed

@@ -23,10 +23,8 @@ public class DailyForecastActivity extends Activity {
 
     private Day[] mDays;
 
-    @InjectView(android.R.id.list)
-    ListView mListView;
-    @InjectView(android.R.id.empty)
-    TextView mEmptyTextView;
+    @InjectView(android.R.id.list) ListView mListView;
+    @InjectView(android.R.id.empty) TextView mEmptyTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
