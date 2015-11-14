@@ -19,6 +19,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.patels95.sanam.stormy.R;
 import com.patels95.sanam.stormy.weather.Current;
 import com.patels95.sanam.stormy.weather.Day;
@@ -44,13 +47,16 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
     public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
 
     private Forecast mForecast;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
 
     @InjectView(R.id.temperatureLabel) TextView mTemperatureLabel;
     @InjectView(R.id.timeLabel) TextView mTimeLabel;
@@ -64,8 +70,8 @@ public class MainActivity extends ActionBarActivity {
 
 
     //declare latitude and longitude
-    double latitude;
-    double longitude;
+    double mLatitude;
+    double mLongitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,38 +81,8 @@ public class MainActivity extends ActionBarActivity {
 
         mProgressBar.setVisibility(View.INVISIBLE);
 
-
-        //get location from the user
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        final Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        LocationListener locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30, 1, locationListener);
-        //log the latitude and longitude
-        Log.d(TAG, "loc = " + latitude + " and " + longitude);
-//        Toast.makeText(this, "loc = " + latitude + " and " + longitude, Toast.LENGTH_LONG).show();
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
 
 //        default forecast location - Boston
         final double latitude = 42.360082;
@@ -114,18 +90,30 @@ public class MainActivity extends ActionBarActivity {
 
 
         //refresh forecast when the refresh button is pressed
-        mRefreshImageView.setOnClickListener(new View.OnClickListener(){
+        mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                getForecast(latitude, longitude);
+            public void onClick(View v) {
+                Log.d(TAG, "loc = " + mLatitude + " and lat = " + mLongitude);
+                getForecast(mLatitude, mLongitude);
                 //updateCity(getCityName(latitude, longitude));
             }
         });
-
-        getForecast(latitude, longitude);
         //updateCity(getCityName(latitude, longitude));
+    }
 
-        Log.d(TAG, "ui code is running");
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "loc = " + mLatitude + " and lat = " + mLongitude);
+        getForecast(mLatitude, mLongitude);
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     private void updateCity(String[] cityState) {
@@ -344,5 +332,24 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(this, HourlyForecastActivity.class);
         intent.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
         startActivity(intent);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            mLatitude = mLastLocation.getLatitude();
+            mLongitude = mLastLocation.getLongitude();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }
