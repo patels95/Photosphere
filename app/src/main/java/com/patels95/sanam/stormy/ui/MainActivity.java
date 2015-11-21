@@ -23,6 +23,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.patels95.sanam.stormy.R;
+import com.patels95.sanam.stormy.util.States;
 import com.patels95.sanam.stormy.weather.Current;
 import com.patels95.sanam.stormy.weather.Day;
 import com.patels95.sanam.stormy.weather.Forecast;
@@ -84,28 +85,15 @@ public class MainActivity extends ActionBarActivity implements
         buildGoogleApiClient();
         mGoogleApiClient.connect();
 
-//        default forecast location - Boston
-        final double latitude = 42.360082;
-        final double longitude = -71.058880;
-
-
         //refresh forecast when the refresh button is pressed
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "loc = " + mLatitude + " and lat = " + mLongitude);
                 getForecast(mLatitude, mLongitude);
-                //updateCity(getCityName(latitude, longitude));
+                updateCity(getCityName(mLatitude, mLongitude));
             }
         });
-        //updateCity(getCityName(latitude, longitude));
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "loc = " + mLatitude + " and lat = " + mLongitude);
-        getForecast(mLatitude, mLongitude);
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -117,7 +105,8 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     private void updateCity(String[] cityState) {
-        mLocationLabel.setText(cityState[0] + ", " + cityState[1]);
+        String location = cityState[0] + ", " + cityState[1];
+        mLocationLabel.setText(location);
     }
 
     private String[] getCityName(double latitude, double longitude) {
@@ -126,16 +115,14 @@ public class MainActivity extends ActionBarActivity implements
         String[] cityState = new String[2];
         try {
             addresses = geocoder.getFromLocation(latitude, longitude, 1);
-            //ERROR with geo data
-//            String cityName = addresses.get(0).getAddressLine(0);
-//            String stateName = addresses.get(0).getAddressLine(1);
-//            cityState[0] = cityName;
-//            cityState[1] = stateName;
-//            Log.d(TAG, "city = " + cityState[0] + " and state =  " + cityState[1]);
+            String cityName = addresses.get(0).getLocality();
+            States states = new States();
+            String stateName = states.getStateAbbreviation(addresses.get(0).getAdminArea());
+            cityState[0] = cityName;
+            cityState[1] = stateName;
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return cityState;
     }
 
@@ -340,7 +327,14 @@ public class MainActivity extends ActionBarActivity implements
         if (mLastLocation != null) {
             mLatitude = mLastLocation.getLatitude();
             mLongitude = mLastLocation.getLongitude();
+            updateCity(getCityName(mLatitude, mLongitude));
+            getForecast(mLatitude, mLongitude);
         }
+        else{
+            // mLastLocation is null
+            Toast.makeText(MainActivity.this, R.string.location_error, Toast.LENGTH_LONG).show();
+        }
+
     }
 
     @Override
