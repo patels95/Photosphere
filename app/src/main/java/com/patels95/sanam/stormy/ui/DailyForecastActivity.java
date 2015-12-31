@@ -25,6 +25,7 @@ public class DailyForecastActivity extends Activity {
 
     @InjectView(android.R.id.list) ListView mListView;
     @InjectView(android.R.id.empty) TextView mEmptyTextView;
+    @InjectView(R.id.locationLabel) TextView mLocationLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,9 @@ public class DailyForecastActivity extends Activity {
         Intent intent = getIntent();
         Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.DAILY_FORECAST);
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
+
+        // Get user location from intent and set location label
+        mLocationLabel.setText(intent.getStringExtra(MainActivity.USER_LOCATION_LABEL));
 
         DayAdapter adapter = new DayAdapter(this, mDays);
         mListView.setAdapter(adapter);

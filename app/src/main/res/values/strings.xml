@@ -18,5 +18,6 @@
     <string name="no_daily_forecast_data">There is no data to display</string>
     <string name="title_activity_hourly_forecast">HourlyForecastActivity</string>
     <string name="location_error">Couldn\'t load weather info. Refresh to try again.</string>
+    <string name="placeholder_location">-----, --</string>
 
 </resources>

@@ -54,10 +54,13 @@ public class MainActivity extends ActionBarActivity implements
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final String DAILY_FORECAST = "DAILY_FORECAST";
     public static final String HOURLY_FORECAST = "HOURLY_FORECAST";
+    public static final String USER_LOCATION_LABEL = "USER_LOCATION_LABEL";
+
 
     private Forecast mForecast;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private String mUserLocationLabel;
 
     @InjectView(R.id.temperatureLabel) TextView mTemperatureLabel;
     @InjectView(R.id.timeLabel) TextView mTimeLabel;
@@ -106,6 +109,7 @@ public class MainActivity extends ActionBarActivity implements
 
     private void updateCity(String[] cityState) {
         String location = cityState[0] + ", " + cityState[1];
+        mUserLocationLabel = location;
         mLocationLabel.setText(location);
     }
 
@@ -310,6 +314,7 @@ public class MainActivity extends ActionBarActivity implements
     public void startDailyActivity(View view) {
         Intent intent = new Intent(this, DailyForecastActivity.class);
         intent.putExtra(DAILY_FORECAST, mForecast.getDailyForecast());
+        intent.putExtra(USER_LOCATION_LABEL, mUserLocationLabel);
         startActivity(intent);
     }
 
